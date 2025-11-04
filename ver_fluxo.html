@@ -1,73 +1,88 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Fluxo de Clientes</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background-color: #f8f9fa;
-        }
-        h1 {
-            color: #333;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #0078d7;
-            color: white;
-            position: sticky;
-            top: 0;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        .table-container {
-            max-height: 75vh;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fluxo de Clientes - Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-top: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 1000px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #0078d7;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .loading {
+      text-align: center;
+      color: #555;
+      margin-top: 30px;
+      font-size: 1.1em;
+    }
+  </style>
 </head>
 <body>
-    <h1>Fluxo de Clientes</h1>
-    <div class="table-container">
-        <table id="tabela-csv">
-            <thead></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+  <h1>Fluxo de Clientes e Vendas</h1>
+  <div class="loading">Carregando dados...</div>
+  <table id="tabela"></table>
 
-    <script>
-        async function carregarCSV() {
-            const response = await fetch('fluxo de clientes.csv');
-            const texto = await response.text();
-            const linhas = texto.split('\n').filter(l => l.trim() !== '');
-            const tabela = document.getElementById('tabela-csv');
-            const thead = tabela.querySelector('thead');
-            const tbody = tabela.querySelector('tbody');
+  <script>
+    async function carregarCSV() {
+      const url = "fluxo de clientes.csv"; // arquivo hospedado na raiz
+      try {
+        const resposta = await fetch(url);
+        if (!resposta.ok) throw new Error("Erro ao carregar o arquivo CSV");
+        const texto = await resposta.text();
 
-            const colunas = linhas[0].split(';');
-            thead.innerHTML = '<tr>' + colunas.map(c => `<th>${c.trim()}</th>`).join('') + '</tr>';
+        const linhas = texto.trim().split("\n");
+        const tabela = document.getElementById("tabela");
+        const cabecalhos = linhas[0].split(";"); // separador ponto e vírgula
 
-            for (let i = 1; i < linhas.length; i++) {
-                const celulas = linhas[i].split(';');
-                const linhaHTML = '<tr>' + celulas.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
-                tbody.innerHTML += linhaHTML;
-            }
+        // Monta o cabeçalho
+        let thead = "<tr>" + cabecalhos.map(c => `<th>${c}</th>`).join("") + "</tr>";
+        let tbody = "";
+
+        // Monta o corpo da tabela
+        for (let i = 1; i < linhas.length; i++) {
+          const cols = linhas[i].split(";");
+          tbody += "<tr>" + cols.map(c => `<td>${c}</td>`).join("") + "</tr>";
         }
 
-        carregarCSV();
-    </script>
+        tabela.innerHTML = thead + tbody;
+        document.querySelector(".loading").style.display = "none";
+
+      } catch (erro) {
+        document.querySelector(".loading").textContent = "Erro ao carregar os dados: " + erro.message;
+      }
+    }
+
+    carregarCSV();
+  </script>
 </body>
 </html>
